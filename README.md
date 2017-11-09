@@ -7,6 +7,12 @@ Maven
 Java 8
 DynamoDB
 
+## Build with Maven
+
+```
+mvn clean install package
+```
+
 ## When run with a currency pair, writes raw trade data served over web sockets from Poloniex to append only Dynamodb table
 
 ```
