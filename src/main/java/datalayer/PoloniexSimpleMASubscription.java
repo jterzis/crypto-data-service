@@ -35,10 +35,10 @@ public class PoloniexSimpleMASubscription extends PoloniexSubscription {
                                         Long date = new Date().getTime();
                                         DataTuple item = new DataTuple<String, String, String>(
                                                 pair, last, Long.toString(date+100));
-                                        dynamoClient.insertItem(item);
+                                        dynamoClient.insertItemQuoteTable(item);
                                         // TODO: Convert to bulk insert within 1 minute intervals
-                                        LOG.trace(event.arguments());
-                                        LOG.trace(item);
+                                        //LOG.trace(event.arguments());
+                                        //LOG.trace(item);
                                 }
                         }
                 } catch (Exception var3) {

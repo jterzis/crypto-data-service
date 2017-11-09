@@ -23,22 +23,43 @@ import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
  * Implements WSSClient from https://github.com/TheCookieLab/poloniex-api-java
  */
 public class PoloniexQuoteApp {
+    private final static String USDTBTC = "USDT_BTC";
     private final static Logger LOG = LogManager.getLogger();
+
+    public PoloniexQuoteApp(){
+    }
+
+    public void runClient() {
+        String[] ticker_array = {};
+        PoloniexQuoteApp.main(ticker_array);
+    }
+
+    public void runClient(String ticker) {
+        String[] ticker_array = {ticker};
+        PoloniexQuoteApp.main(ticker_array);
+    }
+
+    public void runClient(String[] args) {
+        PoloniexQuoteApp.main(args);
+    }
 
     public static void main(String[] args) {
         try (WSSClient poloniexWSSClient = new WSSClient("wss://api.poloniex.com", "realm1"))
         {
             List<String> tickers = new ArrayList<String>();
-            if (args.length > 0)
-            {
+            if (args.length > 0){
                 for (String ticker : args) {tickers.add(ticker);}
             }
-            else {tickers.add("USDT_BTC");}
+            else {tickers.add(USDTBTC);}
 
             // Create DynamoDB client
             DynamoClient dynamoClient = new DynamoClient();
             String table_creation_status = dynamoClient.CheckCreateQuoteTable();
-
+            dynamoClient.deleteTable(dynamoClient.getPairsSessionTableName());
+            String pairs_creation_status = dynamoClient.CheckCreatePairsSessionTable();
+            for (String ticker : tickers){
+                dynamoClient.insertItemPairsSessionTable(ticker);
+            }
             PoloniexSimpleMASubscription poloTickerSubscribe = new PoloniexSimpleMASubscription(
                     "ticker", dynamoClient, tickers);
             poloniexWSSClient.subscribe(poloTickerSubscribe);
@@ -55,8 +76,11 @@ public class PoloniexQuoteApp {
             }
             */
             LOG.trace("About to run client....");
-            poloniexWSSClient.run(1200000000);
-
+            while(true) {
+                while (true) {
+                    poloniexWSSClient.run(1200000000);
+                }
+            }
         } catch (InterruptedException ex) {
             System.err.println("InterruptedException exception: " + ex.getMessage());
         } catch (URISyntaxException ex) {
